@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VidSnap - Instant Video Downloader</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #ec4899;
+            --dark: #0f172a;
+            --light: #f8fafc;
+            --card-bg: rgba(255, 255, 255, 0.05);
+        }
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #f1f5f9;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(90deg, #6366f1 0%, #ec4899 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-weight: 800;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #6366f1 0%, #ec4899 100%);
+        }
+        
+        .hover-grow {
+            transition: transform 0.3s ease;
+        }
+        
+        .hover-grow:hover {
+            transform: translateY(-5px);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(99, 102, 241, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
+        }
+        
+        .fade-in-up {
+            animation: fadeInUp 0.6s ease-out;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .platform-icon {
+            transition: all 0.3s ease;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+        
+        .platform-icon:hover {
+            background: rgba(99, 102, 241, 0.2);
+            border-color: #6366f1;
+            transform: translateY(-5px);
+        }
+        
+        .loading-spinner {
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            border-top: 3px solid #6366f1;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .video-card {
+            transition: all 0.3s ease;
+            border-left: 4px solid #6366f1;
+        }
+        
+        .video-card:hover {
+            background: rgba(99, 102, 241, 0.1);
+        }
+        
+        .quality-badge {
+            background: rgba(99, 102, 241, 0.2);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+        }
+        
+        /* Mobile optimizations */
+        @media (max-width: 640px) {
+            .mobile-padding {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+            
+            .mobile-stack {
+                flex-direction: column;
+            }
+            
+            .mobile-text-center {
+                text-align: center;
+            }
+            
+            .mobile-mt-2 {
+                margin-top: 0.5rem;
+            }
+            
+            .glass-card {
+                border-radius: 16px;
+            }
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(30, 41, 59, 0.5);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #6366f1 0%, #ec4899 100%);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #4f46e5 0%, #db2777 100%);
+        }
+        
+        /* Input focus effects */
+        .input-focus:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+            outline: none;
+        }
+        
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- Toast Notification -->
+    <div id="toast" class="toast hidden">
+        <div class="glass-card p-4 max-w-sm">
+            <div class="flex items-center">
+                <i id="toastIcon" class="fas fa-info-circle text-blue-400 mr-3"></i>
+                <p id="toastMessage" class="text-sm"></p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Header/Navigation -->
+    <header class="sticky top-0 z-50 glass-card mx-4 md:mx-8 mt-4 rounded-2xl">
+        <nav class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <div class="w-10 h-10 rounded-full gradient-bg flex items-center justify-center">
+                        <i class="fas fa-play text-white"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold gradient-text">VidSnap</h1>
+                        <p class="text-xs text-slate-400 hidden md:block">Instant Video Downloader</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <button id="themeToggle" class="p-2 rounded-full bg-slate-800/50 hover:bg-slate-700/50">
+                        <i class="fas fa-moon text-slate-300"></i>
+                    </button>
+                    <a href="#how-to-use" class="hidden md:inline text-slate-300 hover:text-white transition">Guide</a>
+                    <button id="infoBtn" class="p-2 rounded-full bg-slate-800/50 hover:bg-slate-700/50">
+                        <i class="fas fa-info text-slate-300"></i>
+                    </button>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8 mobile-padding">
+        <!-- Hero Section -->
+        <section class="text-center mb-12 animate__animated animate__fadeIn">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4">
+                Download <span class="gradient-text">Videos</span> Instantly
+            </h1>
+            <p class="text-lg text-slate-400 max-w-2xl mx-auto mb-8">
+                Paste a link from YouTube, TikTok, Instagram, Facebook, or X.com and download in high quality. Fast, free, and easy to use.
+            </p>
+            
+            <!-- URL Input Section -->
+            <div class="max-w-3xl mx-auto mb-8">
+                <div class="glass-card p-6 md:p-8 rounded-2xl">
+                    <div class="flex flex-col md:flex-row gap-4 mobile-stack">
+                        <div class="flex-grow">
+                            <div class="relative">
+                                <i class="fas fa-link absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+                                <input 
+                                    type="text" 
+                                    id="urlInput" 
+                                    placeholder="https://www.youtube.com/watch?v=..." 
+                                    class="w-full pl-12 pr-4 py-4 rounded-xl bg-slate-900/50 border border-slate-700 text-white placeholder-slate-500 input-focus"
+                                >
+                            </div>
+                            <p class="text-sm text-slate-400 mt-2 ml-1">Supports: YouTube, TikTok, Instagram, Facebook, X.com</p>
+                        </div>
+                        
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <div class="flex items-center justify-center bg-slate-800/50 rounded-xl px-4 py-3">
+                                <label class="flex items-center cursor-pointer">
+                                    <div class="relative">
+                                        <input type="checkbox" id="streamOption" class="sr-only" checked>
+                                        <div class="block bg-slate-700 w-12 h-6 rounded-full"></div>
+                                        <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition transform duration-300"></div>
+                                    </div>
+                                    <div class="ml-3 text-sm font-medium">
+                                        Stream Mode
+                                    </div>
+                                </label>
+                            </div>
+                            
+                            <button 
+                                id="downloadBtn" 
+                                class="btn-primary text-white font-semibold py-4 px-8 rounded-xl flex items-center justify-center gap-2 pulse-animation mobile-mt-2"
+                            >
+                                <i class="fas fa-bolt"></i>
+                                <span>Download Now</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Supported Platforms -->
+            <div class="mb-12">
+                <h2 class="text-2xl font-bold mb-6 mobile-text-center">Supported Platforms</h2>
+                <div class="grid grid-cols-2 md:grid-cols-5 gap-4 max-w-3xl mx-auto">
+                    <div class="platform-icon p-4 rounded-xl text-center hover-grow">
+                        <i class="fab fa-youtube text-4xl text-red-500 mb-2"></i>
+                        <p class="font-medium">YouTube</p>
+                    </div>
+                    <div class="platform-icon p-4 rounded-xl text-center hover-grow">
+                        <i class="fab fa-tiktok text-4xl text-black dark:text-white mb-2"></i>
+                        <p class="font-medium">TikTok</p>
+                    </div>
+                    <div class="platform-icon p-4 rounded-xl text-center hover-grow">
+                        <i class="fab fa-instagram text-4xl text-pink-500 mb-2"></i>
+                        <p class="font-medium">Instagram</p>
+                    </div>
+                    <div class="platform-icon p-4 rounded-xl text-center hover-grow">
+                        <i class="fab fa-facebook text-4xl text-blue-500 mb-2"></i>
+                        <p class="font-medium">Facebook</p>
+                    </div>
+                    <div class="platform-icon p-4 rounded-xl text-center hover-grow">
+                        <i class="fab fa-twitter text-4xl text-sky-500 mb-2"></i>
+                        <p class="font-medium">X.com</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Loading Indicator -->
+        <section id="loadingSection" class="hidden max-w-2xl mx-auto mb-12">
+            <div class="glass-card p-8 rounded-2xl text-center">
+                <div class="loading-spinner mx-auto mb-4"></div>
+                <h3 class="text-xl font-semibold mb-2">Processing Your Video</h3>
+                <p class="text-slate-400">Fetching video information and preparing download options...</p>
+                <div class="w-full bg-slate-800 rounded-full h-2 mt-6">
+                    <div id="progressBar" class="gradient-bg h-2 rounded-full w-1/3"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Results Section -->
+        <section id="resultsSection" class="hidden max-w-6xl mx-auto mb-12">
+            <div class="glass-card p-6 rounded-2xl">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold">Download Options</h2>
+                    <button id="clearResults" class="text-sm text-slate-400 hover:text-white">
+                        <i class="fas fa-times mr-1"></i> Clear
+                    </button>
+                </div>
+                
+                <!-- Video Info Card -->
+                <div id="videoInfoCard" class="video-card glass-card p-5 rounded-xl mb-6 hidden">
+                    <div class="flex flex-col md:flex-row gap-5">
+                        <div id="thumbnailContainer" class="flex-shrink-0">
+                            <img id="videoThumbnail" src="" alt="Video thumbnail" class="w-full md:w-48 rounded-lg shadow-lg">
+                        </div>
+                        <div class="flex-grow">
+                            <h3 id="videoTitle" class="text-xl font-bold mb-2"></h3>
+                            <div class="flex flex-wrap gap-4 text-slate-400 mb-3">
+                                <span id="videoDuration" class="flex items-center">
+                                    <i class="far fa-clock mr-2"></i>
+                                    <span></span>
+                                </span>
+                                <span id="videoPlatform" class="flex items-center">
+                                    <i class="fas fa-video mr-2"></i>
+                                    <span></span>
+                                </span>
+                                <span id="videoAuthor" class="flex items-center">
+                                    <i class="fas fa-user mr-2"></i>
+                                    <span></span>
+                                </span>
+                            </div>
+                            <p id="videoDescription" class="text-slate-400 text-sm"></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Download Options -->
+                <div id="resultsContainer" class="space-y-4">
+                    <!-- Format cards will be dynamically inserted here -->
+                </div>
+                
+                <!-- No Results Message -->
+                <div id="noResults" class="text-center py-8 hidden">
+                    <i class="fas fa-video-slash text-5xl text-slate-700 mb-4"></i>
+                    <h3 class="text-xl font-semibold mb-2">No Download Options Found</h3>
+                    <p class="text-slate-400 max-w-md mx-auto">
+                        We couldn't find any downloadable formats for this video. Try toggling the "Stream Mode" option or check if the video is publicly accessible.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- How to Use Section -->
+        <section id="how-to-use" class="max-w-6xl mx-auto mb-12">
+            <h2 class="text-2xl font-bold mb-6 text-center">How to Use VidSnap</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="glass-card p-6 rounded-xl hover-grow">
+                    <div class="w-14 h-14 rounded-full gradient-bg flex items-center justify-center mb-4">
+                        <span class="text-white font-bold text-xl">1</span>
+                    </div>
+                    <h3 class="text-lg font-semibold mb-2">Copy Video URL</h3>
+                    <p class="text-slate-400">Go to your favorite platform (YouTube, TikTok, etc.) and copy the video URL from the address bar or share button.</p>
+                </div>
+                
+                <div class="glass-card p-6 rounded-xl hover-grow">
+                    <div class="w-14 h-14 rounded-full gradient-bg flex items-center justify-center mb-4">
+                        <span class="text-white font-bold text-xl">2</span>
+                    </div>
+                    <h3 class="text-lg font-semibold mb-2">Paste & Process</h3>
+                    <p class="text-slate-400">Paste the URL in the input field above and click "Download Now". VidSnap will analyze the video instantly.</p>
+                </div>
+                
+                <div class="glass-card p-6 rounded-xl hover-grow">
+                    <div class="w-14 h-14 rounded-full gradient-bg flex items-center justify-center mb-4">
+                        <span class="text-white font-bold text-xl">3</span>
+                    </div>
+                    <h3 class="text-lg font-semibold mb-2">Download & Enjoy</h3>
+                    <p class="text-slate-400">Choose your preferred quality and format, then download the video directly to your device.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section class="max-w-6xl mx-auto mb-12">
+            <h2 class="text-2xl font-bold mb-6 text-center">Why Choose VidSnap?</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="glass-card p-5 rounded-xl text-center">
+                    <i class="fas fa-bolt text-3xl gradient-text mb-3"></i>
+                    <h3 class="font-semibold mb-2">Fast Processing</h3>
+                    <p class="text-sm text-slate-400">Get download links in seconds with our optimized API.</p>
+                </div>
+                
+                <div class="glass-card p-5 rounded-xl text-center">
+                    <i class="fas fa-shield-alt text-3xl gradient-text mb-3"></i>
+                    <h3 class="font-semibold mb-2">Secure & Private</h3>
+                    <p class="text-sm text-slate-400">Your downloads are processed securely. We don't store your data.</p>
+                </div>
+                
+                <div class="glass-card p-5 rounded-xl text-center">
+                    <i class="fas fa-mobile-alt text-3xl gradient-text mb-3"></i>
+                    <h3 class="font-semibold mb-2">Mobile Friendly</h3>
+                    <p class="text-sm text-slate-400">Works perfectly on all devices - phones, tablets, and desktops.</p>
+                </div>
+                
+                <div class="glass-card p-5 rounded-xl text-center">
+                    <i class="fas fa-infinity text-3xl gradient-text mb-3"></i>
+                    <h3 class="font-semibold mb-2">No Limits</h3>
+                    <p class="text-sm text-slate-400">Download as many videos as you want, completely free.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="glass-card mx-4 md:mx-8 mb-4 rounded-2xl">
+        <div class="container mx-auto px-4 py-6">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 rounded-full gradient-bg flex items-center justify-center">
+                            <i class="fas fa-play text-white text-sm"></i>
+                        </div>
+                        <span class="font-bold gradient-text">VidSnap</span>
+                    </div>
+                    <p class="text-sm text-slate-400 mt-2">Instant Video Downloader</p>
+                </div>
+                
+                <div class="text-center md:text-right">
+                    <p class="text-sm text-slate-400">
+                        <i class="fas fa-circle text-xs text-green-500 mr-1"></i> 
+                        <span id="apiStatus">API Status: Operational</span>
+                    </p>
+                    <p class="text-xs text-slate-500 mt-1">
+                        © 2023 VidSnap. For personal use only.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM Elements
+            const urlInput = document.getElementById('urlInput');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const streamOption = document.getElementById('streamOption');
+            const loadingSection = document.getElementById('loadingSection');
+            const resultsSection = document.getElementById('resultsSection');
+            const resultsContainer = document.getElementById('resultsContainer');
+            const videoInfoCard = document.getElementById('videoInfoCard');
+            const noResults = document.getElementById('noResults');
+            const clearResultsBtn = document.getElementById('clearResults');
+            const themeToggle = document.getElementById('themeToggle');
+            const infoBtn = document.getElementById('infoBtn');
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            const toastIcon = document.getElementById('toastIcon');
+            const progressBar = document.getElementById('progressBar');
+            const apiStatus = document.getElementById('apiStatus');
+            
+            // Initialize toggle switch
+            updateToggleSwitch();
+            
+            // Theme toggle functionality
+            themeToggle.addEventListener('click', function() {
+                const icon = this.querySelector('i');
+                if (document.body.classList.contains('dark')) {
+                    document.body.classList.remove('dark');
+                    document.body.style.background = 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)';
+                    icon.classList.remove('fa-sun');
+                    icon.classList.add('fa-moon');
+                    showToast('Switched to dark mode', 'info');
+                } else {
+                    document.body.classList.add('dark');
+                    document.body.style.background = 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)';
+                    document.body.style.color = '#1e293b';
+                    icon.classList.remove('fa-moon');
+                    icon.classList.add('fa-sun');
+                    showToast('Switched to light mode', 'info');
+                }
+            });
+            
+            // Info button
+            infoBtn.addEventListener('click', function() {
+                showToast('VidSnap supports YouTube, TikTok, Instagram, Facebook, and X.com', 'info');
+            });
+            
+            // Clear results
+            clearResultsBtn.addEventListener('click', function() {
+                resultsSection.classList.add('hidden');
+                urlInput.value = '';
+                urlInput.focus();
+                showToast('Cleared results', 'success');
+            });
+            
+            // Toggle switch update
+            streamOption.addEventListener('change', updateToggleSwitch);
+            
+            function updateToggleSwitch() {
+                const toggleDot = streamOption.parentElement.querySelector('.dot');
+                if (streamOption.checked) {
+                    toggleDot.style.transform = 'translateX(26px)';
+                    toggleDot.parentElement.querySelector('.block').style.background = 'linear-gradient(135deg, #10b981 0%, #34d399 100%)';
+                } else {
+                    toggleDot.style.transform = 'translateX(0)';
+                    toggleDot.parentElement.querySelector('.block').style.backgroundColor = '#475569';
+                }
+            }
+            
+            // Download button handler
+            downloadBtn.addEventListener('click', processDownload);
+            
+            // Enter key handler
+            urlInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    processDownload();
+                }
+            });
+            
+            // Example URLs for placeholder rotation
+            const exampleUrls = [
+                "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+                "https://www.tiktok.com/@example/video/123456789",
+                "https://www.instagram.com/reel/ABC1234567/",
+                "https://www.facebook.com/watch/?v=123456789",
+                "https://twitter.com/user/status/123456789"
+            ];
+            
+            // Rotate example URLs every 5 seconds
+            let urlIndex = 0;
+            setInterval(() => {
+                urlInput.placeholder = exampleUrls[urlIndex];
+                urlIndex = (urlIndex + 1) % exampleUrls.length;
+            }, 5000);
+            
+            // Process download
+            async function processDownload() {
+                const url = urlInput.value.trim();
+                
+                // Validate URL
+                if (!url) {
+                    showToast('Please enter a video URL', 'error');
+                    urlInput.focus();
+                    return;
+                }
+                
+                // Validate URL format
+                if (!isValidUrl(url)) {
+                    showToast('Please enter a valid URL', 'error');
+                    urlInput.focus();
+                    return;
+                }
+                
+                // Show loading
+                loadingSection.classList.remove('hidden');
+                resultsSection.classList.add('hidden');
+                videoInfoCard.classList.add('hidden');
+                noResults.classList.add('hidden');
+                
+                // Simulate progress animation
+                let progress = 0;
+                const progressInterval = setInterval(() => {
+                    progress += 10;
+                    progressBar.style.width = `${progress}%`;
+                    if (progress >= 90) clearInterval(progressInterval);
+                }, 200);
+                
+                try {
+                    // Call backend API
+                    const response = await fetch('/download', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            url: url,
+                            stream: streamOption.checked
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    // Complete progress
+                    progressBar.style.width = '100%';
+                    setTimeout(() => {
+                        loadingSection.classList.add('hidden');
+                    }, 500);
+                    
+                    if (data.success) {
+                        displayResults(data.data);
+                        showToast('Video processed successfully!', 'success');
+                    } else {
+                        showToast(data.message || 'Failed to process video', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    loadingSection.classList.add('hidden');
+                    showToast('Network error. Please check your connection.', 'error');
+                } finally {
+                    clearInterval(progressInterval);
+                }
+            }
+            
+            // Display results
+            function displayResults(data) {
+                // Clear previous results
+                resultsContainer.innerHTML = '';
+                
+                // Check for errors
+                if (data.error && data.error !== "URL parameter is required") {
+                    showToast(data.error, 'error');
+                    return;
+                }
+                
+                // Show video info if available
+                if (data.title || data.thumbnail || data.duration) {
+                    videoInfoCard.classList.remove('hidden');
+                    
+                    if (data.thumbnail) {
+                        document.getElementById('videoThumbnail').src = data.thumbnail;
+                        document.getElementById('thumbnailContainer').classList.remove('hidden');
+                    }
+                    
+                    if (data.title) {
+                        document.getElementById('videoTitle').textContent = data.title;
+                    }
+                    
+                    if (data.duration) {
+                        document.getElementById('videoDuration').querySelector('span').textContent = data.duration;
+                    }
+                    
+                    if (data.platform) {
+                        document.getElementById('videoPlatform').querySelector('span').textContent = data.platform;
+                    }
+                    
+                    if (data.author) {
+                        document.getElementById('videoAuthor').querySelector('span').textContent = data.author;
+                    }
+                    
+                    if (data.description) {
+                        document.getElementById('videoDescription').textContent = data.description.substring(0, 150) + '...';
+                    }
+                }
+                
+                // Display download options
+                if (data.formats && data.formats.length > 0) {
+                    data.formats.forEach((format, index) => {
+                        const formatCard = createFormatCard(format, index);
+                        resultsContainer.appendChild(formatCard);
+                    });
+                } else if (data.direct_url) {
+                    const directCard = createDirectCard(data.direct_url);
+                    resultsContainer.appendChild(directCard);
+                } else {
+                    noResults.classList.remove('hidden');
+                }
+                
+                // Show results section
+                resultsSection.classList.remove('hidden');
+                resultsSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+            
+            // Create format card
+            function createFormatCard(format, index) {
+                const card = document.createElement('div');
+                card.className = 'glass-card p-5 rounded-xl fade-in-up video-card';
+                card.style.animationDelay = `${index * 0.1}s`;
+                
+                const quality = format.quality || format.resolution || 'HD';
+                const container = format.container ? format.container.toUpperCase() : 'MP4';
+                const fileSize = format.fileSize ? ` • ${format.fileSize}` : '';
+                const hasAudio = format.hasAudio !== false;
+                
+                card.innerHTML = `
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div class="flex-grow">
+                            <div class="flex flex-wrap items-center gap-3 mb-2">
+                                <span class="quality-badge px-3 py-1 rounded-full text-sm font-medium">${quality}</span>
+                                <span class="text-sm text-slate-400">${container}</span>
+                                ${format.bitrate ? `<span class="text-sm text-slate-400"><i class="fas fa-tachometer-alt mr-1"></i>${format.bitrate}</span>` : ''}
+                                <span class="text-sm text-slate-400">
+                                    <i class="fas fa-music mr-1"></i>
+                                    ${hasAudio ? 'With Audio' : 'No Audio'}
+                                </span>
+                            </div>
+                            ${fileSize ? `<p class="text-sm text-slate-400"><i class="fas fa-weight mr-1"></i>${fileSize}</p>` : ''}
+                        </div>
+                        <div>
+                            <a href="${format.url}" 
+                               ${hasAudio ? 'download' : 'target="_blank"'} 
+                               class="btn-primary text-white font-semibold py-3 px-6 rounded-xl flex items-center gap-2">
+                                <i class="fas fa-download"></i>
+                                <span>Download</span>
+                            </a>
+                        </div>
+                    </div>
+                `;
+                
+                return card;
+            }
+            
+            // Create direct download card
+            function createDirectCard(url) {
+                const card = document.createElement('div');
+                card.className = 'glass-card p-5 rounded-xl fade-in-up video-card';
+                
+                card.innerHTML = `
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div>
+                            <h4 class="font-semibold text-lg mb-1">Direct Video Link</h4>
+                            <p class="text-slate-400 text-sm">Click to open or download the video</p>
+                        </div>
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <a href="${url}" target="_blank" class="bg-slate-800 hover:bg-slate-700 text-white font-semibold py-3 px-6 rounded-xl flex items-center justify-center gap-2 transition">
+                                <i class="fas fa-external-link-alt"></i>
+                                <span>Open</span>
+                            </a>
+                            <a href="${url}" download class="btn-primary text-white font-semibold py-3 px-6 rounded-xl flex items-center justify-center gap-2">
+                                <i class="fas fa-download"></i>
+                                <span>Download</span>
+                            </a>
+                        </div>
+                    </div>
+                `;
+                
+                return card;
+            }
+            
+            // Show toast notification
+            function showToast(message, type = 'info') {
+                toastMessage.textContent = message;
+                
+                // Set icon and color based on type
+                if (type === 'success') {
+                    toastIcon.className = 'fas fa-check-circle text-green-400 mr-3';
+                } else if (type === 'error') {
+                    toastIcon.className = 'fas fa-exclamation-triangle text-red-400 mr-3';
+                } else {
+                    toastIcon.className = 'fas fa-info-circle text-blue-400 mr-3';
+                }
+                
+                toast.classList.remove('hidden');
+                
+                // Auto hide after 4 seconds
+                setTimeout(() => {
+                    toast.classList.add('hidden');
+                }, 4000);
+            }
+            
+            // Validate URL
+            function isValidUrl(string) {
+                try {
+                    new URL(string);
+                    return true;
+                } catch (_) {
+                    return false;
+                }
+            }
+            
+            // Check API status on load
+            async function checkApiStatus() {
+                try {
+                    const response = await fetch('/health');
+                    if (response.ok) {
+                        apiStatus.innerHTML = '<i class="fas fa-circle text-xs text-green-500 mr-1"></i> API Status: Operational';
+                    } else {
+                        apiStatus.innerHTML = '<i class="fas fa-circle text-xs text-yellow-500 mr-1"></i> API Status: Limited';
+                    }
+                } catch (error) {
+                    apiStatus.innerHTML = '<i class="fas fa-circle text-xs text-red-500 mr-1"></i> API Status: Offline';
+                }
+            }
+            
+            // Initial API status check
+            checkApiStatus();
+            
+            // Focus on URL input on page load
+            urlInput.focus();
+        });
+    </script>
+</body>
+</html>
